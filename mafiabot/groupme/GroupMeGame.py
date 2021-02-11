@@ -11,9 +11,9 @@ class GroupMeGame(MGame):
   MChatType = GroupMeChat
   MDMType = GroupMeDM
 
-  def handle_main(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
+  def handle_main_(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
     if cmd == MCmd.VOTE:
-      self.handle_vote(sender_id, text, data)
+      self.handle_main_vote(sender_id, text, data)
     elif cmd == MCmd.STATUS:
       self.handle_main_status(sender_id, text)
     elif cmd == MCmd.HELP:
@@ -23,9 +23,9 @@ class GroupMeGame(MGame):
     elif cmd == MCmd.UNTIMER:
       self.handle_untimer(sender_id)
 
-  def handle_mafia(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
+  def handle_mafia_(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
     if cmd == MCmd.TARGET:
-      self.handle_mtarget(sender_id, text)
+      self.handle_mafia_mtarget(sender_id, text)
     elif cmd == MCmd.STATUS:
       self.handle_mafia_status(sender_id, text)
     elif cmd == MCmd.HELP:
@@ -33,7 +33,7 @@ class GroupMeGame(MGame):
 
   def handle_dm(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
     if cmd == MCmd.TARGET:
-      self.handle_target(sender_id, text)
+      self.handle_dm_target(sender_id, text)
     elif cmd == MCmd.REVEAL:
       self.handle_reveal(sender_id)
     elif cmd == MCmd.STATUS:
@@ -41,7 +41,7 @@ class GroupMeGame(MGame):
     elif cmd == MCmd.HELP:
       self.handle_dm_help(sender_id, text)
 
-  def handle_vote(self, sender_id, text, data):
+  def handle_main_vote(self, sender_id, text, data):
     words = text.split()
     voter_id = sender_id
     votee_id = None
@@ -75,7 +75,7 @@ class GroupMeGame(MGame):
 
     return target_number
 
-  def handle_mtarget(self, sender_id, text):
+  def handle_mafia_mtarget(self, sender_id, text):
     targeter_id = sender_id
     try:
       target_number = self.getTarget(text)
@@ -85,12 +85,12 @@ class GroupMeGame(MGame):
         target_id = list(self.mstate.players.keys())[target_number]
     except Exception as e:
       print(e)
-      self.mafia_chat.cast(resp_lib["INVALID_MTARGET"].format(text=text))
+      self.mafia_cast(resp_lib["INVALID_MTARGET"].format(text=text))
       return False
     
     return super().handle_mtarget(targeter_id, target_id)
 
-  def handle_target(self, sender_id, text):
+  def handle_dm_target(self, sender_id, text):
     itarget = self.mstate.phase == MPhase.DUSK
     try:
       target_number = self.getTarget(text)
@@ -104,7 +104,7 @@ class GroupMeGame(MGame):
         target_id = player_order[target_number]
     except Exception as e:
       print(e)
-      self.dms.send(resp_lib["INVALID_TARGET"].format(text=text)+"{}".format(e),sender_id)
+      self.dm_send(sender_id,resp_lib["INVALID_TARGET"].format(text=text)+"{}".format(e))
       return False
 
     return super().handle_target(sender_id, target_id)

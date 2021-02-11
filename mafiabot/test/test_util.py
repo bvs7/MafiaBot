@@ -1,7 +1,7 @@
 import unittest
 from collections import deque
 
-from ..chatinterface import MChat, MDM
+from ..chatinterface import MChat, MDM, PrintMInterface
 from ..mafiastate import MState, MRules, MPhase
 
 def verbose(*args):
@@ -38,7 +38,9 @@ def halt_timer(*args):
   print_mode("Halt Timer!")
 
 def standardState(rules=MRules()):
-  mstate = MState(rules=rules)
+  PrintMInterface.init()
+  mstate = MState(main_chat_id = "MAIN", mafia_chat_id = "MAFIA", rules=rules)
+  mstate.minter = PrintMInterface
   mstate.halt_timer = halt_timer
   return mstate
 

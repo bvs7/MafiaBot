@@ -3,6 +3,7 @@ import time
 from .test_util import * # pylint: disable=unused-wildcard-import
 from ..mafiastate import EndGameException
 from ..mafiactrl import MGame, FastMTimer
+from ..chatinterface import PrintMInterface, TestMInterface
 
 class Test_MGame(unittest.TestCase):
 
@@ -16,6 +17,11 @@ class Test_MGame(unittest.TestCase):
     self.assertTrue(self.end_game_flag)
     time.sleep(5)
     self.assertTrue(self.destroy_callback_flag)
+
+  @classmethod
+  def setUpClass(cls):
+    MState.minter = PrintMInterface
+    MGame.minter = PrintMInterface
 
   def setUp(self):
     self.mgame = MGame('1')

@@ -1,7 +1,7 @@
 import unittest
 import time
 from .. import GroupMeGame
-from ...chatinterface import TestMChat, TestMDM, MChat, MDM, MCmd
+from ...chatinterface import TestMChat, TestMDM, MChat, MDM, MCmd, TestMInterface
 from ...test.test_util import *
 from ...mafiactrl import FastMTimer
 
@@ -29,22 +29,20 @@ class Test_GroupMeGame(unittest.TestCase):
 
   @classmethod
   def setUpClass(cls):
+    GroupMeGame.minter = TestMInterface
+    MState.minter = TestMInterface
     cls.MGameType = GroupMeGame
     cls.MGameType.MChatType = MChat
     cls.MGameType.MDMType = MDM
 
-  def setUp(self):
+  def test_simple1(self):
+    TestMInterface.test_id = 1
     self.mgame = self.MGameType('1')
     self.mgame.end_game = self.end_game
     self.mgame.MTimerType = FastMTimer
     self.end_game_flag = False
     self.mgame.destroy_callback = self.destroy_callback
     self.destroy_callback_flag = False
-
-  def test_simple1(self):
-    self.mgame.main_chat = TestMChat('MAIN', test_id=1)
-    self.mgame.mafia_chat = TestMChat('MAFIA', self.mgame.main_chat, test_id=1)
-
     users = get_users(3)
     roleGen = get_roleGen(['TOWN','TOWN','MAFIA'])
     self.mgame.start(users,roleGen)
@@ -64,8 +62,14 @@ class Test_GroupMeGame(unittest.TestCase):
     self.tryEnd()
 
   def test_simple2(self):
-    self.mgame.main_chat = TestMChat('MAIN', test_id=2)
-    self.mgame.mafia_chat = TestMChat('MAFIA', self.mgame.main_chat, test_id=2)
+    TestMInterface.test_id = 2
+    self.mgame = self.MGameType('1')
+    self.mgame.end_game = self.end_game
+    self.mgame.MTimerType = FastMTimer
+    self.end_game_flag = False
+    self.mgame.destroy_callback = self.destroy_callback
+    self.destroy_callback_flag = False
+
     users = get_users(3)
     self.mgame.dms = TestMDM(self.mgame.main_chat, test_id=2, user_ids=list(users.keys()))
 
