@@ -5,7 +5,7 @@ import json
 from . import MGame, MTimer, MLobby
 from ..resp_lib import get_resp
 from ..mafiastate import MRules, MRoleGen, EndGameException
-from ..chatinterface import MChat, MDM, MServer, MCmd
+from ..chatinterface import MInterface, MServer, MCmd
 
 MIN_PLAYERS = 3
 TIMER_MINUTES = 10
@@ -15,18 +15,15 @@ class MController:
   Starts a server, tracks lobbies and games, routes incomings commands to lobbies/games
   This class can be subclassed to define the type of Chat, DM, Server, Game, etc.
   """
-  
-  MChatType = MChat
-  MDMType = MDM
   MServerType = MServer
   MGameType = MGame
   MLobbyType = MLobby
   MTimerType = MTimer
+  minter = MInterface
 
   def __init__(self, lobby_ids):
     
     self.lobbies = dict( [(l_id,self.MLobbyType(self,l_id)) for l_id in lobby_ids] )
-    self.dms = self.MDMType()
     self.rules = MRules()
     self.games:Dict[int,MGame] = {}
     self.focusedGames = {}

@@ -1,16 +1,16 @@
 
 from ..mafiactrl import MController
 
-from ..chatinterface import MChat, MDM
-from . import GroupMeChat, GroupMeDM, GroupMeServer, GroupMeGame
-
+from ..chatinterface import MChat, MDM, MInterface
+from . import GroupMeInterface, GroupMeServer, GroupMeGame
 
 class GroupMeController(MController):
 
-  MChatType = GroupMeChat
-  MDMType = GroupMeDM
   MGameType = GroupMeGame
   MServerType = GroupMeServer
+  minter = GroupMeInterface
+
+  
 
 class TestGroupMeController(MController):
 
@@ -27,4 +27,3 @@ class TestGroupMeController(MController):
   def run(self):
     server = self.MServerType(self.handle_chat, self.handle_dm)
     server.run(debug=True)
-

@@ -5,15 +5,22 @@ Interface class for interacting with chats and dms or other comms forms
 from typing import NewType, Iterable, Mapping, Callable
 from abc import ABC
 
-from .MChat import MChat, MDM
+from .MChat import MChat, MDM, CastError
 from .TestMChat import TestMChat, TestMDM
 
 DEFAULT_CHAT_NAME = "___"
 
-def check_chat(func):
+def make_chat(func):
   def fn(cls, chat_id, *args, **kwargs):
     if not chat_id in cls.chats:
       cls.new(DEFAULT_CHAT_NAME)
+    func(cls, chat_id, *args, **kwargs)
+  return fn
+
+def check_chat(func):
+  def fn(cls, chat_id, *args, **kwargs):
+    if not chat_id in cls.chats:
+      raise CastError("Chat_id not found: {}".format(chat_id))
     func(cls, chat_id, *args, **kwargs)
   return fn
 
@@ -38,12 +45,13 @@ class MInterface:
       cls.valid = True
 
   @classmethod
+  @check_chat
   def cast(cls, chat_id:MChatID, msg:str):
-    pass
+    return cls.chats[chat_id].cast(msg)
 
   @classmethod
   def send(cls, user_id:MUserID, msg:str):
-    pass
+    return cls.dms.send(msg, user_id)
 
   @classmethod
   @check_chat
@@ -57,7 +65,7 @@ class MInterface:
     return chat.id
 
   @classmethod
-  @check_chat
+  @make_chat
   def add(cls, chat_id:MChatID, users:Mapping[MUserID,str]):
     cls.chats[chat_id].add(users)
 
@@ -67,16 +75,28 @@ class MInterface:
     cls.chats[chat_id].remove(user_ids)
 
   @classmethod
-  @check_chat
+  @make_chat
   def refill(cls, chat_id:MChatID, users:Mapping[MUserID,str]):
     cls.chats[chat_id].refill(users)
 
   @classmethod
+  @check_chat
   def destroy(cls, chat_id:MChatID):
-    pass
+    cls.chats[chat_id].destroy()
+    del cls.chats[chat_id]
+
+  @classmethod
+  @check_chat
+  def getName(cls, chat_id:MChatID, user_id:MUserID):
+    return cls.chats[chat_id].getName(user_id)
+
+  @classmethod
+  @check_chat
+  def getAcks(cls, chat_id, msg_id):
+    return cls.chats[chat_id].getAcks(msg_id)
 
 class PrintMInterface(MInterface):
-
+  """ Overly Simple Test without ChatType or DMType implementation """
   MChatID = MInterface.MChatID
   MUserID = MInterface.MUserID
 
@@ -136,8 +156,20 @@ class TestMInterface(MInterface):
   test_id = None
 
   @classmethod
+  def init(cls):
+    try:
+      cls.dms = cls.MDMType(test_id=cls.test_id, user_ids=range(5))
+    except OSError as e:
+      print(e)
+    if not cls.valid:
+      cls.chats = {}
+      cls.valid = True
+
+  @classmethod
   def new(cls, chat_name:str) -> MChatID: #pylint: disable=undefined-variable
-    return cls.MChatType(chat_name, test_id=cls.test_id)
+    chat = cls.MChatType(chat_name.split()[0], test_id=cls.test_id)
+    cls.chats[chat_name] = chat
+    return chat_name
 
 class MCastable(ABC):
 

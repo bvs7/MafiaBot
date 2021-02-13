@@ -48,22 +48,22 @@ class Test_GroupMeGame(unittest.TestCase):
     self.mgame.start(users,roleGen)
 
     self.assertTrue( 
-      self.mgame.handle_chat("MAIN",'1',MCmd.VOTE, \
+      self.mgame.handle_chat("MAIN CHAT 1",'1',MCmd.VOTE, \
         text="vote @TWO",data=create_vote_for('2')))
 
     self.assertTrue( 
-      self.mgame.handle_chat("MAIN",'2',MCmd.VOTE, \
+      self.mgame.handle_chat("MAIN CHAT 1",'2',MCmd.VOTE, \
         text="vote @ONE",data=create_vote_for('1')))
     
     self.assertTrue( 
-      self.mgame.handle_chat("MAIN",'3',MCmd.VOTE, \
+      self.mgame.handle_chat("MAIN CHAT 1",'3',MCmd.VOTE, \
         text="vote @TWO",data=create_vote_for('2')))
 
     self.tryEnd()
 
   def test_simple2(self):
     TestMInterface.test_id = 2
-    self.mgame = self.MGameType('1')
+    self.mgame = self.MGameType('2')
     self.mgame.end_game = self.end_game
     self.mgame.MTimerType = FastMTimer
     self.end_game_flag = False
@@ -71,25 +71,23 @@ class Test_GroupMeGame(unittest.TestCase):
     self.destroy_callback_flag = False
 
     users = get_users(3)
-    self.mgame.dms = TestMDM(self.mgame.main_chat, test_id=2, user_ids=list(users.keys()))
-
     roleGen = get_roleGen(['COP','TOWN','MAFIA'])
     self.mgame.start(users,roleGen)
     self.assertTrue( 
-      self.mgame.handle_chat("MAIN",'1',MCmd.VOTE, \
+      self.mgame.handle_chat("MAIN CHAT 2",'1',MCmd.VOTE, \
         text="vote nokill",data={}))
 
     self.assertTrue( 
-      self.mgame.handle_chat("MAIN",'2',MCmd.VOTE, \
+      self.mgame.handle_chat("MAIN CHAT 2",'2',MCmd.VOTE, \
         text="vote nokill",data={}))
 
     self.mgame.handle_dm('1',MCmd.TARGET, "target C")
-    self.mgame.handle_chat('MAFIA','3',MCmd.TARGET,text="target D")
+    self.mgame.handle_chat('MAFIA CHAT 2','3',MCmd.TARGET,text="target D")
 
     self.assertTrue( 
-      self.mgame.handle_chat("MAIN",'1',MCmd.VOTE, \
+      self.mgame.handle_chat("MAIN CHAT 2",'1',MCmd.VOTE, \
         text="vote @TWO",data=create_vote_for('2')))
 
     self.assertTrue( 
-      self.mgame.handle_chat("MAIN",'2',MCmd.VOTE, \
+      self.mgame.handle_chat("MAIN CHAT 2",'2',MCmd.VOTE, \
         text="vote me",data={}))

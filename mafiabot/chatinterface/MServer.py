@@ -82,6 +82,9 @@ class MCmd(VEnum):
 
   def is_lobby(self):
     return self in self.lobby()
+
+  def __str__(self):
+    return self.name
       
 
 ACCESS_KW = "/"

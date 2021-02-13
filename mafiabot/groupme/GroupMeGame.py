@@ -11,7 +11,7 @@ class GroupMeGame(MGame):
   MChatType = GroupMeChat
   MDMType = GroupMeDM
 
-  def handle_main_(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
+  def handle_main(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
     if cmd == MCmd.VOTE:
       self.handle_main_vote(sender_id, text, data)
     elif cmd == MCmd.STATUS:
@@ -23,7 +23,7 @@ class GroupMeGame(MGame):
     elif cmd == MCmd.UNTIMER:
       self.handle_untimer(sender_id)
 
-  def handle_mafia_(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
+  def handle_mafia(self, sender_id:MPlayerID, cmd:MCmd, text="", data={}):
     if cmd == MCmd.TARGET:
       self.handle_mafia_mtarget(sender_id, text)
     elif cmd == MCmd.STATUS:

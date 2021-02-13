@@ -2,10 +2,14 @@
 from typing import Tuple, Dict
 import time
 
-from ..chatinterface import MChat, MDM, CastError
+from ..chatinterface import MChat, MDM, CastError, MInterface
 
 GROUPME_KEYFILE = "../../.groupme.key"
 MODERATOR = "43040067"
+
+CALLBACK_URL = "http://70.180.16.29:1121/"
+CHAT_CALLBACK_URL = CALLBACK_URL
+DM_CALLBACK_URL = CALLBACK_URL + "dm"
 
 try:
   import groupy
@@ -22,11 +26,14 @@ CAST_DELAY = .1
 
 class GroupMeChat(MChat):
 
-  def __init__(self, group_id, name_reference:MChat = None):
+  def __init__(self, group_id=None, group=None, name_reference:MChat = None):
     # TODO: automatically make a new chat if this one doesn't exist
-    print("GroupMeChat",flush=True)
-    self.id = group_id
-    self.group = client.groups.get(group_id)
+    if not group:
+      self.id = group_id
+      self.group = client.groups.get(group_id)
+    else:
+      self.group = group
+      self.id = group.id
     self.setNameReference(name_reference)
     # Get member names
     self.names = {}
@@ -41,7 +48,7 @@ class GroupMeChat(MChat):
   def new(name):
     g = client.groups.create(name)
     time.sleep(.5)
-    g.create_bot("Mafia Bot", callback_url = "http://70.180.16.29:1121/", dm_notification=False)
+    g.create_bot("Mafia Bot", callback_url = CHAT_CALLBACK_URL, dm_notification=False)
     return GroupMeChat(g.id)
 
   def __format(self, msg): # Default format if no name_reference
@@ -141,3 +148,27 @@ class GroupMeDM(MDM):
     except Exception as e:
       raise CastError(e)
     return m_id
+
+class GroupMeInterface(MInterface):
+
+  MChatType = GroupMeChat
+  MDMType = GroupMeDM
+
+  valid = False
+
+  @classmethod
+  def init(cls):
+    if not cls.valid:
+      cls.chats = {}
+      groups = client.groups.list_all()
+      for group in groups:
+        cls.chats[group.id] = cls.MChatType(group=group)
+      cls.dms = cls.MDMType()
+      cls.valid = True
+
+  @classmethod
+  def new(cls, chat_name:str):
+    chat = cls.MChatType.new(chat_name)
+    cls.chats[chat.id] = chat
+    return chat.id
+    
