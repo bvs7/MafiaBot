@@ -32,7 +32,8 @@ class MLobby:
     return self.minter.cast(self.lobby_id, msg)
 
   def handle_chat(self, group_id, sender_id, cmd, **kwargs):
-
+    if not group_id == self.lobby_id:
+      return False
     if cmd == MCmd.IN:
       self.handle_in(sender_id, **kwargs)
     if cmd == MCmd.OUT:
@@ -64,7 +65,7 @@ class MLobby:
     self.start_min_players = min_p
     self.start_timer = self.ctrl.MTimerType(minutes*60, {0:[self.try_start_game]})
 
-  def handle_watch(self, sender_id, g_id=None):
+  def handle_watch(self, sender_id, g_id=None, **kwargs):
     if len(self.game_ids) == 0:
       self.lobby_cast(get_resp("WATCH_NO_GAMES"))
       return True

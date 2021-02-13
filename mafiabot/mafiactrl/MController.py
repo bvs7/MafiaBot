@@ -17,11 +17,13 @@ class MController:
   """
   MServerType = MServer
   MGameType = MGame
-  MLobbyType = MLobby
+  MLobbyType = MLobby.MLobby
   MTimerType = MTimer
   minter = MInterface
 
   def __init__(self, lobby_ids):
+
+    self.MLobbyType.minter = self.minter
     
     self.lobbies = dict( [(l_id,self.MLobbyType(self,l_id)) for l_id in lobby_ids] )
     self.rules = MRules()
@@ -30,9 +32,9 @@ class MController:
 
     # Check for active games?
 
-  def run(self):
-    server = self.MServerType(self.handle_chat, self.handle_dm)
-    server.run()
+  def start(self, *args, **kwargs):
+    self.server = self.MServerType(self.handle_chat, self.handle_dm, *args, **kwargs)
+    self.server.start()
     
   # callback for Server
   def handle_chat(self, group_id, sender_id, cmd:MCmd, **kwargs):
@@ -51,8 +53,6 @@ class MController:
           if g.id in l.game_ids:
             l.handle_end(g.id, ege.msg)
 
-          
-    
     for l in self.lobbies.values():
       if l.handle_chat(group_id, sender_id, cmd, **kwargs):
         return True
@@ -76,7 +76,7 @@ class MController:
         g = g_list.popLeft()
         g_list.append(g)
         g_id = self.games[g_list[0]]
-        self.dms.send("Focusing on Game {}".format(g_id), sender_id)
+        self.minter.send(sender_id, "Focusing on Game {}".format(g_id))
 
   def start_game(self, users, rules, lobby=None):
     g = self.MGameType.new()
@@ -102,7 +102,7 @@ class MController:
   def watch(self, sender_id, g_id):
     game = self.games[g_id]
     game.main_chat.add(sender_id)
-    self.dms.send(sender_id, get_resp("WATCH",g_id=g_id))
+    self.minter.send(sender_id, get_resp("WATCH",g_id=g_id))
 
   def save(self):
     # save lobbies

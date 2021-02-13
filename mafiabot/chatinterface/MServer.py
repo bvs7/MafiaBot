@@ -124,10 +124,12 @@ class TestMServer(MServer):
     self.lines.append(line)
       
   def chat(self, line=None):
+    print(line)
     if not line:
       text = input("Text: ")
     else:
       words = deque(line.split())
+      print(words)
       text = words.popleft()
     if text[0:len(ACCESS_KW)] == ACCESS_KW:
       if not line:
@@ -136,6 +138,7 @@ class TestMServer(MServer):
       else:
         group_id = words.popleft()
         sender_id = words.popleft()
+      print(text,group_id,sender_id)
       command = text.split()[0][len(ACCESS_KW):]
       if not line:
         j = input("Data (json): ")
@@ -151,6 +154,7 @@ class TestMServer(MServer):
         data = {'attachments':[{'type':'mentions','user_ids':[votee]}]}
       else:
         data = json.loads(j)
+      print(group_id, sender_id, command, text, data)
       self.handle_chat(group_id, sender_id, command, text=text, data=data)
 
   def dm(self, line=None):
@@ -190,6 +194,7 @@ class TestMServer(MServer):
       chat_dm = input("Chat/DM, [c]/d: ")
       rest_line = None
     else:
+      print(line)
       words = line.split()
       chat_dm = words[0]
       rest_line = " ".join(words[1:])
@@ -205,8 +210,8 @@ class TestMServer(MServer):
       self.dm(rest_line)
 
   def start(self):
-    thread = threading.Thread(target=self.run)
-    thread.start()
+    self.thread = threading.Thread(target=self.run)
+    self.thread.start()
 
   def run(self):
     if not self.lines:
